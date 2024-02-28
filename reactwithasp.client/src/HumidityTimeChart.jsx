@@ -6,18 +6,22 @@ import fetchHumidityData from "../data/fetchHumidityData";
 // make sure parent container have a defined height when using
 // responsive component, otherwise height will be 0 and
 // no chart will be rendered.
-export default function MyResponsiveLine() {
-  const [humidityData, setHumiditydata] = useState({
-    id: "Humidity",
-    color: "hsl(271, 70%, 50%)",
-    data: [],
-  });
+export default function HumidityTimeChart() {
+  const [humidityData, setHumiditydata] = useState([
+    {
+      id: "Placeholder data",
+      data: [
+        { x: "16:40", y: 20 },
+        { x: "16:50", y: 30 },
+      ],
+    },
+  ]);
 
   const updateHumidityData = async () => {
     try {
       const json = await fetchHumidityData();
-      console.log("Gotten json:", json);
-      setHumiditydata({ ...humidityData, data: json });
+
+      setHumiditydata([...json]);
     } catch (error) {
       console.error("Failed to fetch humidity data:", error);
     }
@@ -28,7 +32,7 @@ export default function MyResponsiveLine() {
 
     const intervalId = setInterval(() => {
       updateHumidityData();
-    }, 10000);
+    }, 1000 * 60);
 
     return () => {
       clearInterval(intervalId);
@@ -37,44 +41,49 @@ export default function MyResponsiveLine() {
 
   return (
     <ResponsiveLine
-      data={[humidityData]}
+      data={humidityData}
+      animate
       theme={byTheNumbers}
-      margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-      xScale={{ type: "point" }}
-      yScale={{
-        type: "linear",
-        min: "auto",
-        max: "auto",
-        stacked: true,
-        reverse: false,
-      }}
-      yFormat=" >-.2f"
-      axisTop={null}
-      axisRight={null}
       axisBottom={{
-        tickSize: 5,
-        tickPadding: 5,
-        tickRotation: 0,
-        legend: "Time",
-        legendOffset: 36,
-        legendPosition: "middle",
-        truncateTickAt: 0,
+        format: "%H",
+        legend: "time scale",
+        legendOffset: -12,
+        tickValues: "every 1 hour",
       }}
       axisLeft={{
-        tickSize: 5,
-        tickPadding: 5,
-        tickRotation: 0,
         legend: "Humidity (%)",
-        legendOffset: -40,
-        legendPosition: "middle",
-        truncateTickAt: 0,
+        legendOffset: 12,
       }}
-      pointSize={10}
-      pointColor={{ theme: "background" }}
-      pointBorderWidth={2}
-      pointBorderColor={{ from: "serieColor" }}
-      pointLabelYOffset={-12}
-      useMesh={true}
+      curve="monotoneX"
+      enablePointLabel
+      height={600}
+      margin={{
+        bottom: 60,
+        left: 80,
+        right: 120,
+        top: 20,
+      }}
+      pointBorderColor={{
+        from: "color",
+        modifiers: [["darker", 0.3]],
+      }}
+      pointBorderWidth={1}
+      pointSize={16}
+      pointSymbol={function noRefCheck() {}}
+      useMesh
+      width={1000}
+      xFormat="time:%H:%M"
+      xScale={{
+        format: "%H:%M",
+        precision: "minute",
+        type: "time",
+        useUTC: false,
+      }}
+      yScale={{
+        type: "linear",
+        max: "100",
+        min: "0",
+      }}
       legends={[
         {
           anchor: "bottom-right",

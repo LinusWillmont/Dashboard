@@ -2,30 +2,57 @@ const fetch = require("node-fetch");
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 
-let isSendingData = false;
+// let isSendingData = false;
+// const main = async () => {
+//   if (!isSendingData) {
+//     const intervalId = setInterval(async () => {
+//       try {
+//         isSendingData = true;
+//         const newData = await readFromSerial();
+//         console.log("Data from serial:", newData);
+//         await sendDataViaHttpPost(newData);
+//       } catch (error) {
+//         console.log("Failed to read from serial or send data:", error);
+//       } finally {
+//         isSendingData = false;
+//       }
+//     }, 1000);
+//   } else {
+//     console.log(
+//       "Previous POST request still in progress. Skipping this iteration."
+//     );
+//   }
+
+//   process.once("SIGINT", () => clearInterval(intervalId));
+// };
+
 const main = async () => {
+  console.log("Fetching arduino data");
   const intervalId = setInterval(async () => {
-    if (!isSendingData) {
-      try {
-        isSendingData = true;
-        const newData = await readFromSerial();
-        console.log("Data from serial:", newData);
-        await sendDataViaHttpPost(newData);
-      } catch (error) {
-        console.log("Failed to read from serial or send data:", error);
-      } finally {
-        isSendingData = false;
+    try {
+      const newData = await readFromSerial();
+      console.log("Data from serial:", newData);
+      await sendDataViaHttpPost(newData);
+    } catch (error) {
+      console.log("Failed to read from serial or send data:", error);
+      let nrOfRetries = 100;
+      while (nrOfRetries > 0) {
+        console.log(`Retrying... Attempts left: ${nrOfRetries}`);
+        try {
+          const newData = await readFromSerial();
+          console.log("Data from serial:", newData);
+          await sendDataViaHttpPost(newData);
+          break;
+        } catch (error) {
+          console.log("Retry failed:", error);
+        }
+        nrOfRetries--;
       }
-    } else {
-      console.log(
-        "Previous POST request still in progress. Skipping this iteration."
-      );
     }
-  }, 10000);
+  }, 1000 * 60 * 1);
 
   process.once("SIGINT", () => clearInterval(intervalId));
 };
-
 main();
 
 const sendDataViaHttpPost = async (data) => {
@@ -77,7 +104,7 @@ const readFromSerial = () => {
           console.log("No data received. Trying again...");
           tryReadingAgain();
         }
-      }, 10000);
+      }, 1000 * 10);
     };
 
     tryReadingAgain();

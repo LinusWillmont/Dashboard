@@ -1,11 +1,18 @@
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
-import HumidityTimeChart from "./HumidityTimeChart";
+import HumidityTimeChart from "./components/HumidityTimeChart";
+import { Navbar } from "./components/Navbar";
 
 function App() {
   return (
-    <div style={{ height: "700px", width: "700px" }}>
-      <HumidityTimeChart />
-    </div>
+    <>
+      <Navbar />
+      <div className="main">
+        <Routes>
+          <Route path="/sensors" element={<HumidityTimeChart />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 

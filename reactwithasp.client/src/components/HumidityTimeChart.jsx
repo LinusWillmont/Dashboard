@@ -19,8 +19,9 @@ export default function HumidityTimeChart() {
 
   const updateHumidityData = async () => {
     try {
+      console.log("Fetchin humidity data");
       const json = await fetchHumidityData();
-
+      console.log("Humidity data", json);
       setHumiditydata([...json]);
     } catch (error) {
       console.error("Failed to fetch humidity data:", error);

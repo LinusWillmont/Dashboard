@@ -16,12 +16,12 @@ namespace TempHumiditySensor
 
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins, policy =>
-                {
-                    policy.WithOrigins("https://localhost:5173", "http://localhost:5173", "http://localhost:5108")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+                    });
             });
 
             // Add services to the container.
@@ -46,11 +46,11 @@ namespace TempHumiditySensor
                 app.UseSwaggerUI();
             }
 
+            app.UseCors(MyAllowSpecificOrigins);
+
             app.UseHttpsRedirection();
 
             app.ApplyProjectMigrations();
-
-            app.UseCors(MyAllowSpecificOrigins);
 
             //app.UseAuthorization();;
 
